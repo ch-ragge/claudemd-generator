@@ -1,0 +1,41 @@
+name: Security Scan
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "npm"
+      - run: npm ci
+      - run: npm audit --production
+
+  secret-scan:
+    name: Secret Detection (grep)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan for hardcoded secrets
+        run: |
+          echo "Scanning for hardcoded secrets..."
+          FAILED=0
+          if grep -rEn \
+            "(AKIA[0-9A-Z]{16}|sk-[a-zA-Z0-9]{32,}|ghp_[a-zA-Z0-9]{36}|AIza[0-9A-Za-z_-]{35}|password\s*=\s*['\"][^'\"]{4,}|api[_-]?key\s*=\s*['\"][^'\"]{8,})" \
+            --include="*.ts" --include="*.tsx" --include="*.js" --include="*.mjs" \
+            --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=out \
+            . ; then
+            echo "FAIL: Potential hardcoded secrets detected."
+            FAILED=1
+          else
+            echo "PASS: No hardcoded secrets detected."
+          fi
+          exit $FAILED
