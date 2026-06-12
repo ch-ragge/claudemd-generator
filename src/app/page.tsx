@@ -7,9 +7,9 @@ import {
   type SecurityLevel,
   type GeneratorConfig,
 } from "@/lib/generateClaudeMd";
-
-const ACCENT = "#00B4D8";
-const FRAME = "#1A1A2E";
+import GlassHeader from "@/components/GlassHeader";
+import SiteFooter from "@/components/SiteFooter";
+import Reveal from "@/components/Reveal";
 
 // ────────────────────────────────────────────────
 // Primitive UI parts
@@ -17,10 +17,7 @@ const FRAME = "#1A1A2E";
 
 function Badge({ children }: { children: React.ReactNode }) {
   return (
-    <span
-      className="text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full border"
-      style={{ color: ACCENT, borderColor: ACCENT }}
-    >
+    <span className="text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full border border-accent/40 text-accent">
       {children}
     </span>
   );
@@ -28,17 +25,12 @@ function Badge({ children }: { children: React.ReactNode }) {
 
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div
-      className={`rounded-2xl border p-6 ${className}`}
-      style={{ backgroundColor: FRAME, borderColor: ACCENT + "33" }}
-    >
-      {children}
-    </div>
+    <div className={`rounded-3xl bg-surface p-6 sm:p-10 ${className}`}>{children}</div>
   );
 }
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <p className="text-white font-semibold mb-3">{children}</p>;
+  return <p className="text-ink font-semibold mb-3">{children}</p>;
 }
 
 function RadioCard<T extends string>({
@@ -57,12 +49,12 @@ function RadioCard<T extends string>({
     <button
       type="button"
       onClick={() => onChange(value)}
-      className="rounded-xl border p-4 text-left transition-all w-full"
-      style={{
-        backgroundColor: selected ? ACCENT + "22" : "#0A0A0A",
-        borderColor: selected ? ACCENT : "#333",
-        color: selected ? "#fff" : "#aaa",
-      }}
+      aria-pressed={selected}
+      className={`rounded-2xl border p-4 text-left transition-colors w-full ${
+        selected
+          ? "border-accent bg-accent/5 text-ink"
+          : "border-black/10 bg-white text-subtle hover:border-black/25"
+      }`}
     >
       {children}
     </button>
@@ -84,14 +76,14 @@ function CheckCard({
     <button
       type="button"
       onClick={() => onChange(value, !checked)}
-      className="rounded-xl border p-3 text-left transition-all"
-      style={{
-        backgroundColor: checked ? ACCENT + "22" : "#0A0A0A",
-        borderColor: checked ? ACCENT : "#333",
-        color: checked ? "#fff" : "#aaa",
-      }}
+      aria-pressed={checked}
+      className={`rounded-2xl border p-3 text-left transition-colors ${
+        checked
+          ? "border-accent bg-accent/5 text-ink"
+          : "border-black/10 bg-white text-subtle hover:border-black/25"
+      }`}
     >
-      <span className="mr-2">{checked ? "✓" : "○"}</span>
+      <span className={`mr-2 ${checked ? "text-accent" : ""}`}>{checked ? "✓" : "○"}</span>
       {children}
     </button>
   );
@@ -111,12 +103,11 @@ function PrimaryButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="px-8 py-3 rounded-xl font-semibold transition-all"
-      style={{
-        backgroundColor: disabled ? "#333" : ACCENT,
-        color: disabled ? "#666" : "#000",
-        cursor: disabled ? "not-allowed" : "pointer",
-      }}
+      className={`px-8 py-3 rounded-full font-semibold transition-colors ${
+        disabled
+          ? "bg-black/10 text-subtle cursor-not-allowed"
+          : "bg-accent text-night hover:brightness-105 cursor-pointer"
+      }`}
     >
       {children}
     </button>
@@ -134,8 +125,7 @@ function SecondaryButton({
     <button
       type="button"
       onClick={onClick}
-      className="px-6 py-3 rounded-xl font-semibold border transition-all"
-      style={{ borderColor: "#444", color: "#aaa" }}
+      className="px-6 py-3 rounded-full font-semibold border border-black/15 text-ink transition-colors hover:bg-black/5"
     >
       {children}
     </button>
@@ -152,11 +142,12 @@ function StepBar({ current, total }: { current: number; total: number }) {
       {Array.from({ length: total }).map((_, i) => (
         <div
           key={i}
-          className="h-1 flex-1 rounded-full transition-all"
-          style={{ backgroundColor: i < current ? ACCENT : "#333" }}
+          className={`h-1 flex-1 rounded-full transition-colors ${
+            i < current ? "bg-accent" : "bg-black/10"
+          }`}
         />
       ))}
-      <span className="text-xs ml-2" style={{ color: ACCENT }}>
+      <span className="text-xs ml-2 text-accent">
         {current}/{total}
       </span>
     </div>
@@ -170,39 +161,38 @@ function StepBar({ current, total }: { current: number; total: number }) {
 function StepIntro({ onStart }: { onStart: () => void }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <div className="mb-8">
+      <div className="mb-8 hero-item-1">
         <Badge>CLAUDE.md Generator</Badge>
       </div>
-      <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
-        あなたの CLAUDE.md を<br />
-        <span style={{ color: ACCENT }}>今すぐ生成</span>
+      <h1 className="hero-title text-ink mb-6 hero-item-1">
+        CLAUDE.mdを、
+        <br />
+        <span className="text-accent">30秒で。</span>
       </h1>
-      <p className="text-slate-400 max-w-lg text-base mb-10 leading-relaxed">
+      <p className="text-subtle max-w-lg mb-12 hero-item-2">
         4 つの質問に答えるだけで、プロジェクトに合った
-        セキュリティ規約入りの <code className="text-white bg-slate-800 px-1 rounded">CLAUDE.md</code> が完成します。
+        セキュリティ規約入りの <code className="text-ink bg-surface border border-black/10 px-1.5 rounded-md">CLAUDE.md</code> が完成します。
         <br />
         外部 API 不使用・データ送信なし・完全ブラウザ完結。
       </p>
-      <div className="grid grid-cols-3 gap-4 mb-10 w-full max-w-sm">
-        {[
-          { icon: "🛡️", label: "セキュリティ規約自動生成" },
-          { icon: "⚡", label: "30秒で完成" },
-          { icon: "📋", label: "コピー＆ダウンロード" },
-        ].map((f) => (
-          <div
-            key={f.label}
-            className="rounded-xl p-4 text-center border"
-            style={{ backgroundColor: FRAME, borderColor: ACCENT + "33" }}
-          >
-            <div className="text-2xl mb-2">{f.icon}</div>
-            <div className="text-xs text-slate-400">{f.label}</div>
-          </div>
-        ))}
+      <div className="hero-item-3 flex flex-col items-center w-full">
+        <div className="grid grid-cols-3 gap-4 mb-12 w-full max-w-md">
+          {[
+            { icon: "🛡️", label: "セキュリティ規約自動生成" },
+            { icon: "⚡", label: "30秒で完成" },
+            { icon: "📋", label: "コピー＆ダウンロード" },
+          ].map((f) => (
+            <div key={f.label} className="rounded-2xl p-4 text-center bg-surface">
+              <div className="text-2xl mb-2">{f.icon}</div>
+              <div className="text-xs text-subtle">{f.label}</div>
+            </div>
+          ))}
+        </div>
+        <PrimaryButton onClick={onStart}>今すぐ生成する →</PrimaryButton>
+        <p className="mt-6 text-xs text-subtle">
+          No external API calls · No tracking · No data collection
+        </p>
       </div>
-      <PrimaryButton onClick={onStart}>今すぐ生成する →</PrimaryButton>
-      <p className="mt-6 text-xs text-slate-600">
-        No external API calls · No tracking · No data collection
-      </p>
     </div>
   );
 }
@@ -225,8 +215,8 @@ function Step1({
   ];
   return (
     <div>
-      <h2 className="text-2xl font-bold text-white mb-2">プロジェクト情報</h2>
-      <p className="text-slate-400 text-sm mb-8">プロジェクト名とフレームワークを選んでください。</p>
+      <h2 className="text-2xl font-bold text-ink mb-2 tracking-tight">プロジェクト情報</h2>
+      <p className="text-subtle text-sm mb-8">プロジェクト名とフレームワークを選んでください。</p>
       <div className="mb-6">
         <Label>プロジェクト名</Label>
         <input
@@ -234,8 +224,7 @@ function Step1({
           value={config.projectName}
           onChange={(e) => onChange("projectName", e.target.value)}
           placeholder="例: my-saas-app"
-          className="w-full rounded-xl px-4 py-3 text-white text-sm outline-none border transition-all"
-          style={{ backgroundColor: "#0A0A0A", borderColor: "#444" }}
+          className="w-full rounded-2xl px-4 py-3 text-ink text-sm bg-white border border-black/15 transition-colors focus:border-accent"
         />
       </div>
       <div className="mb-8">
@@ -285,8 +274,8 @@ function Step2({
   };
   return (
     <div>
-      <h2 className="text-2xl font-bold text-white mb-2">技術スタック</h2>
-      <p className="text-slate-400 text-sm mb-8">使用する技術を選んでください（複数可・スキップ可）。</p>
+      <h2 className="text-2xl font-bold text-ink mb-2 tracking-tight">技術スタック</h2>
+      <p className="text-subtle text-sm mb-8">使用する技術を選んでください（複数可・スキップ可）。</p>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-8">
         {TECH.map((t) => (
           <CheckCard
@@ -331,8 +320,8 @@ function Step3({
   ];
   return (
     <div>
-      <h2 className="text-2xl font-bold text-white mb-2">セキュリティ設定</h2>
-      <p className="text-slate-400 text-sm mb-6">レベルと使用機能を選んでください。</p>
+      <h2 className="text-2xl font-bold text-ink mb-2 tracking-tight">セキュリティ設定</h2>
+      <p className="text-subtle text-sm mb-6">レベルと使用機能を選んでください。</p>
       <div className="mb-6">
         <Label>セキュリティレベル</Label>
         <div className="flex flex-col gap-2">
@@ -372,8 +361,7 @@ function Step3({
           onChange={(e) => onChange("notes", e.target.value)}
           placeholder="例: レート制限は 100req/min で実装する"
           rows={3}
-          className="w-full rounded-xl px-4 py-3 text-white text-sm outline-none border resize-none transition-all"
-          style={{ backgroundColor: "#0A0A0A", borderColor: "#444" }}
+          className="w-full rounded-2xl px-4 py-3 text-ink text-sm bg-white border border-black/15 resize-none transition-colors focus:border-accent"
         />
       </div>
       <div className="flex gap-3">
@@ -414,18 +402,28 @@ function StepResult({
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-white mb-2">生成完了 🎉</h2>
-      <p className="text-slate-400 text-sm mb-6">
-        プロジェクトルートに <code className="text-white bg-slate-800 px-1 rounded">CLAUDE.md</code> として保存してください。
+      <h2 className="text-2xl font-bold text-ink mb-2 tracking-tight">生成完了 🎉</h2>
+      <p className="text-subtle text-sm mb-6">
+        プロジェクトルートに <code className="text-ink bg-white border border-black/10 px-1.5 rounded-md">CLAUDE.md</code> として保存してください。
       </p>
-      <div
-        className="rounded-xl border p-4 mb-4 overflow-auto"
-        style={{ backgroundColor: "#0A0A0A", borderColor: "#333", maxHeight: "360px" }}
-      >
-        <pre className="text-xs text-slate-300 whitespace-pre-wrap font-mono leading-relaxed">
-          {output}
-        </pre>
+
+      {/* macOSターミナル風プレビュー（シグネチャ要素） */}
+      <div className="rounded-2xl bg-night overflow-hidden mb-4 shadow-xl">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10">
+          <span aria-hidden="true" className="h-3 w-3 rounded-full bg-[#FF5F57]" />
+          <span aria-hidden="true" className="h-3 w-3 rounded-full bg-[#FEBC2E]" />
+          <span aria-hidden="true" className="h-3 w-3 rounded-full bg-[#28C840]" />
+          <span className="ml-3 text-xs text-white/50 font-mono">
+            {config.projectName.trim() || "project"} — CLAUDE.md
+          </span>
+        </div>
+        <div className="px-5 py-4 overflow-auto" style={{ maxHeight: "360px" }}>
+          <pre className="text-xs whitespace-pre-wrap font-mono leading-relaxed text-[#9be8f8]">
+            {output}
+          </pre>
+        </div>
       </div>
+
       <div className="flex flex-wrap gap-3 mb-8">
         <PrimaryButton onClick={handleCopy}>
           {copied ? "コピー済み ✓" : "クリップボードにコピー"}
@@ -433,8 +431,7 @@ function StepResult({
         <button
           type="button"
           onClick={handleDownload}
-          className="px-6 py-3 rounded-xl font-semibold border transition-all"
-          style={{ borderColor: ACCENT, color: ACCENT }}
+          className="px-6 py-3 rounded-full font-semibold border border-accent text-accent transition-colors hover:bg-accent/5"
         >
           CLAUDE.md をダウンロード
         </button>
@@ -476,16 +473,15 @@ export default function Home() {
   };
 
   return (
-    <main
-      className="min-h-screen flex flex-col items-center justify-center px-4 py-16"
-      style={{ backgroundColor: "#0A0A0A" }}
-    >
+    <>
+    <GlassHeader current="claudemd" />
+    <main className="min-h-screen flex flex-col items-center justify-center bg-base px-4 pt-32 pb-24 sm:pt-36 sm:pb-32">
       <div className="w-full max-w-xl">
         {step === 0 ? (
           <StepIntro onStart={() => setStep(1)} />
         ) : (
           <Card>
-            <StepBar current={step} total={3} />
+            <StepBar current={Math.min(step, 3)} total={3} />
             {step === 1 && (
               <Step1 config={config} onChange={update} onNext={() => setStep(2)} />
             )}
@@ -516,5 +512,79 @@ export default function Home() {
         )}
       </div>
     </main>
+
+    {/* ===== 解説記事セクション（ビルド時HTMLに出力される） ===== */}
+    <section className="bg-surface px-6 py-24 sm:py-32">
+      <Reveal>
+      <article className="max-w-2xl mx-auto text-ink leading-relaxed [&>p]:max-w-[65ch]">
+        <h2 className="text-3xl font-bold text-ink mb-6 tracking-tight">
+          CLAUDE.md とは何か、なぜ必要なのか
+        </h2>
+
+        <p className="mb-8">
+          上のジェネレーターは、4つの質問に答えるだけでプロジェクト用の <code className="text-ink bg-white border border-black/10 px-1.5 rounded-md">CLAUDE.md</code> を生成します。
+          ここでは、そもそも CLAUDE.md とは何か、なぜセキュリティ規約をそこに書くのか、運用するうえでの注意点を解説します。
+        </p>
+
+        <h3 className="text-xl font-bold text-ink mt-10 mb-4">CLAUDE.md とは</h3>
+        <p className="mb-4">
+          CLAUDE.md は、Claude Code（AnthropicのAIコーディングツール）がプロジェクトで作業するときに、
+          最初に読み込む「指示書」にあたるファイルです。プロジェクトのルート（または各ディレクトリ）に置くと、
+          AIはその内容を前提として振る舞います。技術スタック・コーディング規約・禁止事項などを書いておくことで、
+          毎回同じ説明を繰り返さなくても、AIが一貫したルールで動くようになります。
+        </p>
+
+        <h3 className="text-xl font-bold text-ink mt-10 mb-4">なぜセキュリティ規約を CLAUDE.md に書くのか</h3>
+        <p className="mb-4">
+          AIは指示がなければ「動くコード」を優先しがちで、セキュリティ上望ましくない実装（認証情報のハードコード、
+          入力バリデーションの省略など）を提案することがあります。CLAUDE.md にセキュリティ規約を明記しておくと、
+          AIが実装前にその制約をチェックし、危険な提案を避けたり、違反しそうなときに確認を求めたりするようになります。
+          人間が毎回レビューで弾くより、最初からルールを共有しておくほうが事故が起きにくくなります。
+        </p>
+        {/* TODO:本人記入 ── CLAUDE.md にセキュリティ規約を書くようになったきっかけ（ヒヤリとした体験など）を書く。最低200字。書き下ろし */}
+
+        <h3 className="text-xl font-bold text-ink mt-10 mb-4">規約項目の解説</h3>
+        <p className="mb-4">
+          このジェネレーターが出力する規約には、たとえば次のような項目が含まれます。
+        </p>
+        <ul className="list-disc pl-6 mb-4 space-y-2">
+          <li><span className="text-ink font-semibold">環境変数の扱い</span>：APIキーや認証情報はコードに直書きせず、環境変数（<code className="text-ink bg-white border border-black/10 px-1.5 rounded-md">.env.local</code> 等）で管理し、コミットしない。</li>
+          <li><span className="text-ink font-semibold">入力バリデーション</span>：ユーザー入力はバリデーション（Zod等）を通してから使う。</li>
+          <li><span className="text-ink font-semibold">ログ・エラー</span>：ログにPII（個人情報）を出さない。エラーメッセージに内部情報を含めない。</li>
+          <li><span className="text-ink font-semibold">外部API</span>：外部通信の追加は事前に確認する。</li>
+        </ul>
+        <p className="mb-4">
+          セキュリティレベル（厳格／標準／軽量）や使用機能（DB・認証・決済など）の選択に応じて、必要な項目が出力に追加されます。
+        </p>
+
+        <h3 className="text-xl font-bold text-ink mt-10 mb-4">運用してわかった落とし穴</h3>
+        {/* TODO:本人記入 ── CLAUDE.md を実際に運用して気づいた落とし穴（長すぎて読まれない、ルールが形骸化する等）を実体験で書く。最低300字。書き下ろし */}
+        <p className="mb-4 text-subtle italic">
+          （このセクションは運営者が実体験をもとに執筆予定です）
+        </p>
+
+        <h3 className="text-xl font-bold text-ink mt-10 mb-4">まとめ</h3>
+        <p className="mb-4">
+          CLAUDE.md は、AIに「このプロジェクトではこう振る舞ってほしい」を伝えるための土台です。
+          特にセキュリティ規約は、最初に書いておくほど効果があります。まずは上のジェネレーターで雛形を作り、
+          自分のプロジェクトに合わせて育てていくのがおすすめです。
+        </p>
+
+        <p className="mt-10 text-sm text-subtle">
+          関連記事：
+          <a
+            href="https://ch-ragge.github.io/blog/posts/what-is-claude-md/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline text-accent hover:opacity-80"
+          >
+            CLAUDE.mdとは何か【フリーランスSEが3分で解説】
+          </a>
+        </p>
+      </article>
+      </Reveal>
+    </section>
+    <SiteFooter />
+    </>
   );
 }
